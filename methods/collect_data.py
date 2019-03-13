@@ -124,8 +124,8 @@ class Plot(object):
             plt.pause(1.0 / 50)
 
 
-def main():
-    myo.init()
+def main(path):
+    myo.init(sdk_path=path)
     hub = myo.Hub()
     listener = DataCollector(512)
     with hub.run_in_background(listener.on_event):
@@ -133,4 +133,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main('.')
