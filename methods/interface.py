@@ -103,7 +103,7 @@ def plot_emg():
     if sys.platform.startswith('win'):
         path = '../myo_sdk/sdk_windows'
     elif sys.platform.startswith('darwin'):
-        path = '../myo_sdk'
+        path = '../myo_sdk/sdk_macos'
 
     myo.init(sdk_path=path)
     hub = myo.Hub()

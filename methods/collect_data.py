@@ -140,4 +140,4 @@ if __name__ == '__main__':
     if sys.platform.startswith('win'):
         main('../myo_sdk/sdk_windows')
     elif sys.platform.startswith('darwin'):
-        main('../myo_sdk')
+        main('./myo_sdk/sdk_macos')
