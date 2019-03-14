@@ -39,6 +39,7 @@ from threading import Lock, Thread
 
 import myo
 import numpy as np
+import sys
 
 
 class DataCollector(myo.DeviceListener):
@@ -136,4 +137,7 @@ def main(path):
 
 
 if __name__ == '__main__':
-    main('../myo_sdk/sdk_windows')
+    if sys.platform.startswith('win'):
+        main('../myo_sdk/sdk_windows')
+    elif sys.platform.startswith('darwin'):
+        main('../myo_sdk')

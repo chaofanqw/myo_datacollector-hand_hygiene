@@ -100,7 +100,12 @@ class HandWashingCollector(QWidget):
 
 
 def plot_emg():
-    myo.init(sdk_path='../myo_sdk/sdk_windows')
+    if sys.platform.startswith('win'):
+        path = '../myo_sdk/sdk_windows'
+    elif sys.platform.startswith('darwin'):
+        path = '../myo_sdk'
+
+    myo.init(sdk_path=path)
     hub = myo.Hub()
     listener = collect_data.DataCollector(512)
     with hub.run_in_background(listener.on_event):
