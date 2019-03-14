@@ -43,6 +43,7 @@ class Player(QMainWindow):
 
         self.createUI()
         self.isPaused = False
+        self.pipe = None
 
     def createUI(self):
         """Set up the user interface, signals & slots
@@ -187,7 +188,12 @@ class Player(QMainWindow):
                 # after the video finished, the play button stills shows
                 # "Pause", not the desired behavior of a media player
                 # this will fix it
-                self.Stop()
+                if not self.pipe is None:
+                    self.pipe.send({'status': 'end'})
+                self.close()
+
+    def set_pipe(self, pipe):
+        self.pipe = pipe
 
 
 if __name__ == "__main__":

@@ -40,6 +40,9 @@ from threading import Lock, Thread
 import myo
 import numpy as np
 import sys
+import datetime
+import csv
+import os
 
 
 class DataCollector(myo.DeviceListener):
@@ -55,6 +58,8 @@ class DataCollector(myo.DeviceListener):
                            'gyroscope': {'left': [], 'right': []},
                            'acceleration': {'left': [], 'right': []}}
         self.devices = {}
+        self.participant = {}
+        self.time = datetime.datetime.now()
 
     def get_data(self, data_type, hand):
         with self.lock:
@@ -76,17 +81,78 @@ class DataCollector(myo.DeviceListener):
 
     def on_emg(self, event):
         with self.lock:
+            time_now = datetime.datetime.now()
+            time_diff = time_now - self.time
+            frame_number = (time_diff.seconds * 1000000 + time_diff.microseconds) // 40000
+
             self.data_queue['emg'][self.devices[str(event.device_point)]] \
-                .append((event.timestamp, event.emg))
+                .append((event.timestamp, event.emg, frame_number, time_now))
 
     def on_orientation(self, event):
         with self.lock:
+            time_now = datetime.datetime.now()
+            time_diff = time_now - self.time
+            frame_number = (time_diff.seconds * 1000000 + time_diff.microseconds) // 40000
             self.data_queue['orientation'][self.devices[str(event.device_point)]] \
-                .append((event.timestamp, event.orientation))
+                .append((event.timestamp, event.orientation, frame_number, time_now))
             self.data_queue['acceleration'][self.devices[str(event.device_point)]] \
-                .append((event.timestamp, event.acceleration))
+                .append((event.timestamp, event.acceleration, frame_number, time_now))
             self.data_queue['gyroscope'][self.devices[str(event.device_point)]] \
-                .append((event.timestamp, event.gyroscope))
+                .append((event.timestamp, event.gyroscope, frame_number, time_now))
+
+    def set_participant(self, participant_info):
+        with self.lock:
+            self.participant = participant_info
+            self.data_queue = {'emg': {'left': [], 'right': []},
+                               'orientation': {'left': [], 'right': []},
+                               'gyroscope': {'left': [], 'right': []},
+                               'acceleration': {'left': [], 'right': []}}
+            self.time = datetime.datetime.now()
+
+    def dump_doc(self):
+        data_path = '../data/'
+        data_path_participant = data_path + 'person-' + self.participant['participant_name'] + '/'
+        data_path_participant_record = data_path_participant + 'Experiment-' + self.participant['experiment_times'] + '/'
+
+        demo = True if self.participant['video_type'] == 'With Demonstration' else False
+
+        base_attributes = ['-MyoNum', 'Hand', 'TimeInMilliSec', 'ParticipantNum',
+                           'WearingPos', 'RecordType', 'withDemon', 'numFrame', 'DataType']
+
+        if not os.path.exists(data_path):
+            os.mkdir(data_path)
+        if not os.path.exists(data_path_participant):
+            os.mkdir(data_path_participant)
+        if not os.path.exists(data_path_participant_record):
+            os.mkdir(data_path_participant_record)
+
+        for signal in self.data_queue:
+            if signal == 'emg':
+                attributes = base_attributes + ['d' + str(i) for i in range(1, 9)]
+            elif signal == 'orientation':
+                attributes = base_attributes + ['roll', 'pitch', 'yaw', 'magnitude']
+            else:
+                attributes = base_attributes + ['x', 'y', 'z']
+
+            for hand in self.data_queue[signal]:
+                csv_doc = open(data_path_participant_record + signal + '_' + hand + '.csv', 'w')
+                csv_writer = csv.writer(csv_doc)
+                csv_writer.writerow(attributes)
+                for row in self.data_queue[signal][hand]:
+                    record_base = ['Myo-' + hand, hand, datetime.datetime.timestamp(row[3]),
+                                   self.participant['participant_name'], self.participant['position'],
+                                   'Record', demo, row[2]]
+
+                    if signal == 'emg':
+                        csv_writer.writerow(record_base + ['EmgData'] + row[1])
+                    elif signal == 'orientation':
+                        csv_writer.writerow(record_base + ['OriData'] + list(row[1]))
+                    elif signal == 'gyroscope':
+                        csv_writer.writerow(record_base + ['GyroData'] + list(row[1]))
+                    elif signal == 'acceleration':
+                        csv_writer.writerow(record_base + ['AcceleData'] + list(row[1]))
+
+                csv_doc.close()
 
 
 class Plot(object):
@@ -124,6 +190,18 @@ class Plot(object):
 
     def main(self):
         while True:
+            self.update_plot()
+            plt.pause(1.0 / 50)
+
+    def data_plot(self, pipe):
+        while True:
+            if pipe.poll():
+                info = pipe.recv()
+                if info['status'] == 'start':
+                    self.listener.set_participant(info)
+                elif info['status'] == 'end':
+                    self.listener.dump_doc()
+
             self.update_plot()
             plt.pause(1.0 / 50)
 

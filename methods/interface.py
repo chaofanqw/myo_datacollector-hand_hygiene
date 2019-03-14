@@ -6,11 +6,11 @@ from PyQt5.QtCore import Qt
 import methods.vlc_player as vlc_player
 import methods.collect_data as collect_data
 import myo
-from multiprocessing import Process
+from multiprocessing import Process, Pipe
 
 """
 In Windows, please install vlc(x64) from https://www.videolan.org/vlc/download-windows.html ,
-and set the environment path: PYTHON_VLC_MODULE_PATH: C:\Program Files\VideoLAN\VLC or other installed index;
+and set the environment path: PYTHON_VLC_MODULE_PATH: C:\Program Files\VideoLAN\VLC or other installed path;
 
 In MacOS, it will be necessary install vlc by homebrew, with
 brew cask install vlc
@@ -19,9 +19,10 @@ brew cask install vlc
 
 class HandWashingCollector(QWidget):
 
-    def __init__(self):
+    def __init__(self, pipe):
         super().__init__()
 
+        self.pipe = pipe
         self.position_list = ['Wrist', 'Upper Arm', 'Lower Arm']
         self.video_type_list = ['With Demonstration', 'Without Demonstration']
         self.input_width = 200
@@ -93,13 +94,22 @@ class HandWashingCollector(QWidget):
             warning_box.exec()
         else:
             player = vlc_player.Player()
+            player.set_pipe(self.pipe)
+            self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),
+                            'experiment_times': str(self.experiment.text()),
+                            'position': str(self.combobox_position.currentText()),
+                            'video_type': str(self.combobox_type.currentText())})
             self.player.append(player)
             player.show()
-            player.resize(640, 480)
-            player.OpenFile('../resource/Video_withDemon.mp4')
+            player.resize(1200, 800)
+
+            if (str(self.combobox_type.currentText())) == 'With Demonstration':
+                player.OpenFile('../resource/Video_withDemon.mp4')
+            else:
+                player.OpenFile('../resource/Video_withoutDemon.mp4')
 
 
-def plot_emg():
+def plot_emg(pipe):
     if sys.platform.startswith('win'):
         path = '../myo_sdk/sdk_windows'
     elif sys.platform.startswith('darwin'):
@@ -109,22 +119,22 @@ def plot_emg():
     hub = myo.Hub()
     listener = collect_data.DataCollector(512)
     with hub.run_in_background(listener.on_event):
-        collect_data.Plot(listener).main()
+        collect_data.Plot(listener).data_plot(pipe)
 
 
-def interface():
+def interface(pipe):
     app = QApplication(sys.argv)
-    collector = HandWashingCollector()
+    collector = HandWashingCollector(pipe)
     sys.exit(app.exec_())
 
 
 def main():
-    process_emg = Process(target=plot_emg)
-    process_interface = Process(target=interface)
+    pipe_emg, pip_interface = Pipe()
 
+    process_emg = Process(target=plot_emg, args=(pipe_emg,))
+    process_interface = Process(target=interface, args=(pip_interface,))
     process_emg.start()
     process_interface.start()
-
     process_emg.join()
     process_interface.join()
 
