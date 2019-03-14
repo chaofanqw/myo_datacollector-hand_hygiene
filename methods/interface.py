@@ -8,8 +8,13 @@ import methods.collect_data as collect_data
 import myo
 from multiprocessing import Process
 
+"""
+In Windows, please install vlc(x64) from https://www.videolan.org/vlc/download-windows.html ,
+and set the environment path: PYTHON_VLC_MODULE_PATH: C:\Program Files\VideoLAN\VLC or other installed index;
+"""
 
-class Example(QWidget):
+
+class HandWashingCollector(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -92,7 +97,7 @@ class Example(QWidget):
 
 
 def plot_emg():
-    myo.init(sdk_path='..')
+    myo.init(sdk_path='../myo_sdk/sdk_windows')
     hub = myo.Hub()
     listener = collect_data.DataCollector(512)
     with hub.run_in_background(listener.on_event):
@@ -101,13 +106,13 @@ def plot_emg():
 
 def interface():
     app = QApplication(sys.argv)
-    ex = Example()
+    collector = HandWashingCollector()
     sys.exit(app.exec_())
 
 
 def main():
-    process_emg = Process(target=interface)
-    process_interface = Process(target=plot_emg)
+    process_emg = Process(target=plot_emg)
+    process_interface = Process(target=interface)
 
     process_emg.start()
     process_interface.start()

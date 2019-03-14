@@ -133,4 +133,4 @@ def main(path):
 
 
 if __name__ == '__main__':
-    main('.')
+    main('../myo_sdk/sdk_windows')
