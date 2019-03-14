@@ -95,7 +95,8 @@ class Plot(object):
         self.listener = listener
         self.fig = plt.figure()
         self.axes = [self.fig.add_subplot(8, 2, i) for i in range(1, 17)]
-        [(ax.set_ylim([-100, 100])) for ax in self.axes]
+        [(ax.set_ylim([-100, 100]), ax.set_xticks([]),
+          ax.set_yticks([])) for ax in self.axes]
 
         self.graphs = [ax.plot(np.arange(self.n), np.zeros(self.n))[0] for ax in self.axes]
         plt.ion()
@@ -106,6 +107,8 @@ class Plot(object):
 
         self.set_plot(emg_data_left, self.graphs[0::2])
         self.set_plot(emg_data_right, self.graphs[1::2])
+
+        # plt.set_title()
 
         plt.draw()
 

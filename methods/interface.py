@@ -11,6 +11,9 @@ from multiprocessing import Process
 """
 In Windows, please install vlc(x64) from https://www.videolan.org/vlc/download-windows.html ,
 and set the environment path: PYTHON_VLC_MODULE_PATH: C:\Program Files\VideoLAN\VLC or other installed index;
+
+In MacOS, it will be necessary install vlc by homebrew, with
+brew cask install vlc
 """
 
 
