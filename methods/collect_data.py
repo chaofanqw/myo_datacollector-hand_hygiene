@@ -53,10 +53,10 @@ class DataCollector(myo.DeviceListener):
     def __init__(self, n):
         self.n = n
         self.lock = Lock()
-        self.data_queue = {'emg': {'left': [], 'right': []},
-                           'orientation': {'left': [], 'right': []},
-                           'gyroscope': {'left': [], 'right': []},
-                           'acceleration': {'left': [], 'right': []}}
+        self.data_queue = {'emg': {'1': [], '2': []},
+                           'orientation': {'1': [], '2': []},
+                           'gyroscope': {'1': [], '2': []},
+                           'acceleration': {'1': [], '2': []}}
         self.devices = {}
         self.participant = {}
         self.time = datetime.datetime.now()
@@ -75,9 +75,9 @@ class DataCollector(myo.DeviceListener):
 
         with self.lock:
             if str(event.mac_address) == '9B:FA:53:BC:C7:ED':
-                self.devices[str(event.device_point)] = 'left'
+                self.devices[str(event.device_point)] = '1'
             elif str(event.mac_address) == '27:DE:FB:9B:2F:FF':
-                self.devices[str(event.device_point)] = 'right'
+                self.devices[str(event.device_point)] = '2'
 
     def on_emg(self, event):
         with self.lock:
@@ -103,10 +103,10 @@ class DataCollector(myo.DeviceListener):
     def set_participant(self, participant_info):
         with self.lock:
             self.participant = participant_info
-            self.data_queue = {'emg': {'left': [], 'right': []},
-                               'orientation': {'left': [], 'right': []},
-                               'gyroscope': {'left': [], 'right': []},
-                               'acceleration': {'left': [], 'right': []}}
+            self.data_queue = {'emg': {'1': [], '2': []},
+                               'orientation': {'1': [], '2': []},
+                               'gyroscope': {'1': [], '2': []},
+                               'acceleration': {'1': [], '2': []}}
             self.time = datetime.datetime.now()
 
     def dump_doc(self):
@@ -136,12 +136,17 @@ class DataCollector(myo.DeviceListener):
                 attributes = base_attributes + ['x', 'y', 'z']
 
             for hand in self.data_queue[signal]:
-                csv_doc = open(data_path_participant_record + signal + '_' + hand + '.csv', 'w')
+                arm_position = self.participant['position'].split(' ')[int(hand) - 1]
+                arm = arm_position.split('-')[0]
+                position = arm_position.split('-')[1]
+
+                csv_doc = open(data_path_participant_record + signal + '_' + arm + '_' + position + '.csv', 'w')
                 csv_writer = csv.writer(csv_doc)
                 csv_writer.writerow(attributes)
+
                 for row in self.data_queue[signal][hand]:
-                    record_base = ['Myo-' + hand, hand, datetime.datetime.timestamp(row[3]),
-                                   self.participant['participant_name'], self.participant['position'],
+                    record_base = ['Myo-' + hand, arm, datetime.datetime.timestamp(row[3]),
+                                   self.participant['participant_name'], position,
                                    'Record', display_type, demo, row[2]]
 
                     if signal == 'emg':
@@ -170,11 +175,11 @@ class Plot(object):
         plt.ion()
 
     def update_plot(self):
-        emg_data_left = self.listener.get_data('emg', 'left')
-        emg_data_right = self.listener.get_data('emg', 'right')
+        emg_data_1 = self.listener.get_data('emg', '1')
+        emg_data_2 = self.listener.get_data('emg', '2')
 
-        self.set_plot(emg_data_left, self.graphs[0::2])
-        self.set_plot(emg_data_right, self.graphs[1::2])
+        self.set_plot(emg_data_1, self.graphs[0::2])
+        self.set_plot(emg_data_2, self.graphs[1::2])
 
         # plt.set_title()
 
