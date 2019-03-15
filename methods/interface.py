@@ -1,9 +1,10 @@
 import sys
 from PyQt5.QtWidgets import QWidget, QDesktopWidget, QApplication, QComboBox, \
-                            QLineEdit, QVBoxLayout, QMessageBox, QHBoxLayout, \
-                            QLabel, QPushButton
+    QLineEdit, QVBoxLayout, QMessageBox, QHBoxLayout, \
+    QLabel, QPushButton
 from PyQt5.QtCore import Qt
 import methods.vlc_player as vlc_player
+import methods.poster as poster
 import methods.collect_data as collect_data
 import myo
 from multiprocessing import Process, Pipe
@@ -23,8 +24,8 @@ class HandWashingCollector(QWidget):
         super().__init__()
 
         self.pipe = pipe
-        self.position_list = ['Wrist', 'Upper Arm', 'Lower Arm']
-        self.video_type_list = ['With Demonstration', 'Without Demonstration']
+        self.position_list = ['Upper Arm', 'Lower Arm']
+        self.video_type_list = ['With Demonstration', 'Without Demonstration', 'Poster']
         self.input_width = 200
 
         self.v_layout = QVBoxLayout()
@@ -47,7 +48,7 @@ class HandWashingCollector(QWidget):
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
-        self.move(qr.topLeft())
+        self.move(qr.topRight())
         self.setWindowTitle('Hand Washing Experiment')
 
         self.show()
@@ -86,27 +87,35 @@ class HandWashingCollector(QWidget):
         self.combobox_type.addItems(self.video_type_list)
 
     def button_func(self):
-
         if str(self.line_edit.text()) == '' or str(self.experiment.text()) == '':
             warning_box = QMessageBox()
             warning_box.setText('Please enter the participant\'s name\nand the experiment times')
             warning_box.setStandardButtons(QMessageBox.Ok)
             warning_box.exec()
         else:
-            player = vlc_player.Player()
-            player.set_pipe(self.pipe)
-            self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),
-                            'experiment_times': str(self.experiment.text()),
-                            'position': str(self.combobox_position.currentText()),
-                            'video_type': str(self.combobox_type.currentText())})
-            self.player.append(player)
-            player.show()
-            player.resize(1200, 800)
+            if 'Demonstration' in (str(self.combobox_type.currentText())):
+                player = vlc_player.Player()
+                player.set_pipe(self.pipe)
+                self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),
+                                'experiment_times': str(self.experiment.text()),
+                                'position': str(self.combobox_position.currentText()),
+                                'video_type': str(self.combobox_type.currentText())})
+                self.player.append(player)
+                player.show()
+                player.resize(1200, 800)
 
-            if (str(self.combobox_type.currentText())) == 'With Demonstration':
-                player.OpenFile('../resource/Video_withDemon.mp4')
+                if (str(self.combobox_type.currentText())) == 'With Demonstration':
+                    player.OpenFile('../resource/Video_withDemon.mp4')
+                else:
+                    player.OpenFile('../resource/Video_withoutDemon.mp4')
             else:
-                player.OpenFile('../resource/Video_withoutDemon.mp4')
+                handwashing_poster = poster.Poster()
+                handwashing_poster.set_pipe(self.pipe)
+                self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),
+                                'experiment_times': str(self.experiment.text()),
+                                'position': str(self.combobox_position.currentText()),
+                                'video_type': str(self.combobox_type.currentText())})
+                self.player.append(handwashing_poster)
 
 
 def plot_emg(pipe):

@@ -128,6 +128,11 @@ class Player(QMainWindow):
         self.mediaplayer.stop()
         self.playbutton.setText("Play")
 
+    def closeEvent(self, *args, **kwargs):
+        self.timer.stop()
+        self.mediaplayer.stop()
+        self.close()
+
     def OpenFile(self, filename=None):
         """Open a media file in a MediaPlayer
         """

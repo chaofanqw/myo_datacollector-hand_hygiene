@@ -115,9 +115,10 @@ class DataCollector(myo.DeviceListener):
         data_path_participant_record = data_path_participant + 'Experiment-' + self.participant['experiment_times'] + '/'
 
         demo = True if self.participant['video_type'] == 'With Demonstration' else False
+        display_type = 'Poster' if 'Poster' in self.participant['video_type'] else 'Video'
 
         base_attributes = ['-MyoNum', 'Hand', 'TimeInMilliSec', 'ParticipantNum',
-                           'WearingPos', 'RecordType', 'withDemon', 'numFrame', 'DataType']
+                           'WearingPos', 'RecordType', 'DisplayType', 'withDemon', 'numFrame', 'DataType']
 
         if not os.path.exists(data_path):
             os.mkdir(data_path)
@@ -141,7 +142,7 @@ class DataCollector(myo.DeviceListener):
                 for row in self.data_queue[signal][hand]:
                     record_base = ['Myo-' + hand, hand, datetime.datetime.timestamp(row[3]),
                                    self.participant['participant_name'], self.participant['position'],
-                                   'Record', demo, row[2]]
+                                   'Record', display_type, demo, row[2]]
 
                     if signal == 'emg':
                         csv_writer.writerow(record_base + ['EmgData'] + row[1])
