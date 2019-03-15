@@ -24,9 +24,10 @@ class HandWashingCollector(QWidget):
         super().__init__()
 
         self.pipe = pipe
-        self.position_list = ['Upper Arm', 'Lower Arm']
+        self.position_list = ['left-UpperArm right-UpperArm', 'left-LowerArm right-LowerArm',
+                              'left-UpperArm left-LowerArm', 'light-UpperArm right-LowerArm']
         self.video_type_list = ['With Demonstration', 'Without Demonstration', 'Poster']
-        self.input_width = 200
+        self.input_width = 230
 
         self.v_layout = QVBoxLayout()
         self.line_edit = QLineEdit(self)
@@ -56,13 +57,13 @@ class HandWashingCollector(QWidget):
     def layout_init(self):
         experiment_box = QHBoxLayout()
         experiment_box.addWidget(QLabel('Participant Name:'))
-        self.line_edit.setFixedWidth(self.input_width - 10)
+        self.line_edit.setFixedWidth(self.input_width)
         experiment_box.addWidget(self.line_edit, alignment=Qt.AlignHCenter)
         self.v_layout.addLayout(experiment_box)
 
         name_box = QHBoxLayout()
         name_box.addWidget(QLabel('Experiment Times:'))
-        self.experiment.setFixedWidth(self.input_width - 10)
+        self.experiment.setFixedWidth(self.input_width)
         name_box.addWidget(self.experiment, alignment=Qt.AlignHCenter)
         self.v_layout.addLayout(name_box)
 
