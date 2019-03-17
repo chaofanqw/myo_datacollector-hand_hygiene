@@ -53,10 +53,10 @@ class DataCollector(myo.DeviceListener):
     def __init__(self, n):
         self.n = n
         self.lock = Lock()
-        self.data_queue = {'emg': {'1': [], '2': []},
-                           'orientation': {'1': [], '2': []},
-                           'gyroscope': {'1': [], '2': []},
-                           'acceleration': {'1': [], '2': []}}
+        self.data_queue = {'emg': {'1': [], '2': [], '3': []},
+                           'orientation': {'1': [], '2': [], '3': []},
+                           'gyroscope': {'1': [], '2': [], '3': []},
+                           'acceleration': {'1': [], '2': [], '3': []}}
         self.devices = {}
         self.participant = {}
         self.time = datetime.datetime.timestamp(datetime.datetime.now()) * 1000000
@@ -78,6 +78,8 @@ class DataCollector(myo.DeviceListener):
                 self.devices[str(event.device_point)] = '1'
             elif str(event.mac_address) == '27:DE:FB:9B:2F:FF':
                 self.devices[str(event.device_point)] = '2'
+            elif str(event.mac_address) == 'CD:77:5E:B2:99:D2':
+                self.devices[str(event.device_point)] = '3'
 
     def on_emg(self, event):
         with self.lock:
@@ -103,10 +105,10 @@ class DataCollector(myo.DeviceListener):
     def set_participant(self, participant_info):
         with self.lock:
             self.participant = participant_info
-            self.data_queue = {'emg': {'1': [], '2': []},
-                               'orientation': {'1': [], '2': []},
-                               'gyroscope': {'1': [], '2': []},
-                               'acceleration': {'1': [], '2': []}}
+            self.data_queue = {'emg': {'1': [], '2': [], '3': []},
+                               'orientation': {'1': [], '2': [], '3': []},
+                               'gyroscope': {'1': [], '2': [], '3': []},
+                               'acceleration': {'1': [], '2': [], '3': []}}
             self.time = datetime.datetime.timestamp(datetime.datetime.now()) * 1000000
 
     def dump_doc(self):
@@ -167,7 +169,7 @@ class Plot(object):
         self.n = listener.n
         self.listener = listener
         self.fig = plt.figure()
-        self.axes = [self.fig.add_subplot(8, 2, i) for i in range(1, 17)]
+        self.axes = [self.fig.add_subplot(8, 3, i) for i in range(1, 25)]
         [(ax.set_ylim([-100, 100]), ax.set_xticks([]),
           ax.set_yticks([])) for ax in self.axes]
 
@@ -177,9 +179,11 @@ class Plot(object):
     def update_plot(self):
         emg_data_1 = self.listener.get_data('emg', '1')
         emg_data_2 = self.listener.get_data('emg', '2')
+        emg_data_3 = self.listener.get_data('emg', '3')
 
-        self.set_plot(emg_data_1, self.graphs[0::2])
-        self.set_plot(emg_data_2, self.graphs[1::2])
+        self.set_plot(emg_data_1, self.graphs[0::3])
+        self.set_plot(emg_data_2, self.graphs[1::3])
+        self.set_plot(emg_data_3, self.graphs[2::3])
 
         # plt.set_title()
 

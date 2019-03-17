@@ -24,10 +24,12 @@ class HandWashingCollector(QWidget):
         super().__init__()
 
         self.pipe = pipe
-        self.position_list = ['left-UpperArm right-UpperArm', 'left-LowerArm right-LowerArm',
-                              'left-UpperArm left-LowerArm', 'right-UpperArm right-LowerArm']
+        self.position_list = ['left-UpperArm left-LowerArm right-UpperArm',
+                              'left-UpperArm left-LowerArm right-LowerArm',
+                              'left-UpperArm right-UpperArm right-LowerArm',
+                              'left-LowerArm right-UpperArm right-LowerArm']
         self.video_type_list = ['With Demonstration', 'Without Demonstration', 'Poster']
-        self.input_width = 230
+        self.input_width = 300
 
         self.v_layout = QVBoxLayout()
         self.line_edit = QLineEdit(self)
