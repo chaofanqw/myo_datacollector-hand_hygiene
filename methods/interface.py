@@ -25,7 +25,7 @@ class HandWashingCollector(QWidget):
 
         self.pipe = pipe
         self.position_list = ['left-UpperArm right-UpperArm', 'left-LowerArm right-LowerArm',
-                              'left-UpperArm left-LowerArm', 'light-UpperArm right-LowerArm']
+                              'left-UpperArm left-LowerArm', 'right-UpperArm right-LowerArm']
         self.video_type_list = ['With Demonstration', 'Without Demonstration', 'Poster']
         self.input_width = 230
 
@@ -74,7 +74,7 @@ class HandWashingCollector(QWidget):
         self.v_layout.addLayout(position_box)
 
         type_box = QHBoxLayout()
-        type_box.addWidget(QLabel('Video Type:'))
+        type_box.addWidget(QLabel('Display Type:'))
         self.combobox_type.setFixedWidth(self.input_width)
         type_box.addWidget(self.combobox_type, alignment=Qt.AlignHCenter)
         self.v_layout.addLayout(type_box)

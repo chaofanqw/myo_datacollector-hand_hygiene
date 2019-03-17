@@ -59,7 +59,7 @@ class DataCollector(myo.DeviceListener):
                            'acceleration': {'1': [], '2': []}}
         self.devices = {}
         self.participant = {}
-        self.time = datetime.datetime.now()
+        self.time = datetime.datetime.timestamp(datetime.datetime.now()) * 1000000
 
     def get_data(self, data_type, hand):
         with self.lock:
@@ -81,18 +81,18 @@ class DataCollector(myo.DeviceListener):
 
     def on_emg(self, event):
         with self.lock:
-            time_now = datetime.datetime.now()
+            time_now = event.timestamp
             time_diff = time_now - self.time
-            frame_number = (time_diff.seconds * 1000000 + time_diff.microseconds) // 40000
+            frame_number = int(time_diff // 40000)
 
             self.data_queue['emg'][self.devices[str(event.device_point)]] \
                 .append((event.timestamp, event.emg, frame_number, time_now))
 
     def on_orientation(self, event):
         with self.lock:
-            time_now = datetime.datetime.now()
+            time_now = event.timestamp
             time_diff = time_now - self.time
-            frame_number = (time_diff.seconds * 1000000 + time_diff.microseconds) // 40000
+            frame_number = int(time_diff // 40000)
             self.data_queue['orientation'][self.devices[str(event.device_point)]] \
                 .append((event.timestamp, event.orientation, frame_number, time_now))
             self.data_queue['acceleration'][self.devices[str(event.device_point)]] \
@@ -107,7 +107,7 @@ class DataCollector(myo.DeviceListener):
                                'orientation': {'1': [], '2': []},
                                'gyroscope': {'1': [], '2': []},
                                'acceleration': {'1': [], '2': []}}
-            self.time = datetime.datetime.now()
+            self.time = datetime.datetime.timestamp(datetime.datetime.now()) * 1000000
 
     def dump_doc(self):
         data_path = '../data/'
@@ -145,7 +145,7 @@ class DataCollector(myo.DeviceListener):
                 csv_writer.writerow(attributes)
 
                 for row in self.data_queue[signal][hand]:
-                    record_base = ['Myo-' + hand, arm, datetime.datetime.timestamp(row[3]),
+                    record_base = ['Myo-' + hand, arm, row[3],
                                    self.participant['participant_name'], position,
                                    'Record', display_type, demo, row[2]]
 
