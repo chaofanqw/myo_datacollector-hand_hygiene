@@ -1,4 +1,4 @@
-import methods.interface as interface
+import methods.interface_windows as interface
 import methods.project_library as project_library
 import socket
 from threading import Thread
@@ -24,7 +24,10 @@ def connection_mac(pipe):
     print('Connection Address:', addr)
 
     while True:
-        response = json.loads(c.recv(1024).decode())
+        response = c.recv(1024).decode()
+        if response is None:
+            break
+        response = json.loads(response)
 
         if response['status'] == 'start':
             scheduler = sched.scheduler(time.time, time.sleep)

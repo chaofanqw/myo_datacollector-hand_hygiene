@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QDesktopWidget
 from PyQt5.QtGui import QIcon, QPixmap
+import json
 
 
 class Poster(QWidget):
@@ -12,6 +13,7 @@ class Poster(QWidget):
         self.width = 640
         self.height = 480
         self.pipe = None
+        self.s = None
         self.initUI()
 
     def initUI(self):
@@ -31,12 +33,16 @@ class Poster(QWidget):
 
         self.show()
 
-    def set_pipe(self, pipe):
+    def set_pipe(self, pipe, s):
         self.pipe = pipe
+        self.s = s
 
     def closeEvent(self, *args, **kwargs):
         if self.pipe is not None:
             self.pipe.send({'status': 'end'})
+
+        if not self.s is None:
+            self.s.send(json.dumps({'status': 'end'}).encode())
 
         self.close()
 

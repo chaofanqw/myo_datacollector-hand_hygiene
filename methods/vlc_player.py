@@ -26,6 +26,7 @@ from PyQt5.QtGui import QPalette, QColor
 from PyQt5.QtWidgets import QMainWindow, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, \
     QVBoxLayout, QAction, QFileDialog, QApplication
 import vlc
+import json
 
 
 class Player(QMainWindow):
@@ -44,6 +45,7 @@ class Player(QMainWindow):
         self.createUI()
         self.isPaused = False
         self.pipe = None
+        self.s = None
 
     def createUI(self):
         """Set up the user interface, signals & slots
@@ -195,10 +197,15 @@ class Player(QMainWindow):
                 # this will fix it
                 if not self.pipe is None:
                     self.pipe.send({'status': 'end'})
+
+                if not self.s is None:
+                    self.s.send(json.dumps({'status': 'end'}).encode())
+
                 self.close()
 
-    def set_pipe(self, pipe):
+    def set_pipe(self, pipe, s):
         self.pipe = pipe
+        self.s = s
 
 
 if __name__ == "__main__":

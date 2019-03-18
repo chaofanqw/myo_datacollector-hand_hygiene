@@ -6,9 +6,14 @@ from PyQt5.QtCore import Qt
 import methods.vlc_player as vlc_player
 import methods.poster as poster
 import methods.collect_data as collect_data
+import methods.project_library as project_library
 import myo
 from multiprocessing import Process, Pipe
 import socket
+import sched
+import time
+import datetime
+
 
 """
 In Windows, please install vlc(x64) from https://www.videolan.org/vlc/download-windows.html ,
@@ -19,16 +24,77 @@ brew cask install vlc
 """
 
 
+class IPCollector(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+        self.input_width = 300
+        self.v_layout = QVBoxLayout()
+        self.ip_address = QLineEdit()
+        self.ip_port = QLineEdit()
+        self.connection_btn = QPushButton('Connect')
+        self.connection_btn.clicked.connect(self.connection)
+
+        self.init_ui()
+
+    def init_ui(self):
+        ip_box = QHBoxLayout()
+        ip_box.addWidget(QLabel('IP Address:'))
+        self.ip_address.setFixedWidth(self.input_width)
+        ip_box.addWidget(self.ip_address, alignment=Qt.AlignHCenter)
+        self.v_layout.addLayout(ip_box)
+
+        port_box = QHBoxLayout()
+        port_box.addWidget(QLabel('Port:'))
+        self.ip_port.setFixedWidth(self.input_width)
+        port_box.addWidget(self.ip_port, alignment=Qt.AlignHCenter)
+        self.v_layout.addLayout(port_box)
+
+        self.v_layout.addWidget(self.connection_btn)
+        self.setLayout(self.v_layout)
+
+        self.resize(400, 150)
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topRight())
+        self.setWindowTitle('Hand Washing Experiment')
+
+        self.show()
+
+    def connection(self):
+        if str(self.ip_address.text()) == '' or str(self.ip_port.text()) == '':
+            warning_box = QMessageBox()
+            warning_box.setText('Please enter IP Address and/or target Port ')
+            warning_box.setStandardButtons(QMessageBox.Ok)
+            warning_box.exec()
+        else:
+            port = int(self.ip_port.text())
+            ip_address = self.ip_address.text()
+
+            try:
+                s.connect((ip_address, port))
+            except:
+                warning_box = QMessageBox()
+                warning_box.setText('Wrong IP Address and/or Port ')
+                warning_box.setStandardButtons(QMessageBox.Ok)
+                warning_box.exec()
+                sys.exit()
+
+            self.close()
+
+    def closeEvent(self, QCloseEvent):
+        sys.exit()
+
+
 class HandWashingCollector(QWidget):
 
     def __init__(self, pipe):
         super().__init__()
 
         self.pipe = pipe
-        self.position_list = ['left-UpperArm left-LowerArm right-UpperArm',
-                              'left-UpperArm left-LowerArm right-LowerArm',
-                              'left-UpperArm right-UpperArm right-LowerArm',
-                              'left-LowerArm right-UpperArm right-LowerArm']
+        self.position_list = ['left-UpperArm left-LowerArm right-UpperArm right-LowerArm']
         self.video_type_list = ['With Demonstration', 'Without Demonstration', 'Poster']
         self.input_width = 300
 
@@ -52,7 +118,7 @@ class HandWashingCollector(QWidget):
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
-        self.move(qr.topRight())
+        self.move(qr.topLeft())
         self.setWindowTitle('Hand Washing Experiment')
 
         self.show()
@@ -99,7 +165,10 @@ class HandWashingCollector(QWidget):
         else:
             if 'Demonstration' in (str(self.combobox_type.currentText())):
                 player = vlc_player.Player()
-                player.set_pipe(self.pipe)
+                player.set_pipe(self.pipe, s)
+
+                self.connection()
+
                 self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),
                                 'experiment_times': str(self.experiment.text()),
                                 'position': str(self.combobox_position.currentText()),
@@ -112,14 +181,36 @@ class HandWashingCollector(QWidget):
                     player.OpenFile('../resource/Video_withDemon.mp4')
                 else:
                     player.OpenFile('../resource/Video_withoutDemon.mp4')
+
             else:
                 handwashing_poster = poster.Poster()
-                handwashing_poster.set_pipe(self.pipe)
+                handwashing_poster.set_pipe(self.pipe, s)
+
+                self.connection()
+
                 self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),
                                 'experiment_times': str(self.experiment.text()),
                                 'position': str(self.combobox_position.currentText()),
                                 'video_type': str(self.combobox_type.currentText())})
                 self.player.append(handwashing_poster)
+
+    def connection(self):
+        now = datetime.datetime.timestamp(datetime.datetime.now())
+        time_offset = project_library.get_time_offset()
+        sleep_time = now + time_offset + 10
+
+        if self.s is not None:
+            self.s.send({
+                'status': 'start',
+                'time': sleep_time,
+                'message': {'status': 'start', 'participant_name': str(self.line_edit.text()),
+                            'experiment_times': str(self.experiment.text()),
+                            'position': str(self.combobox_position.currentText()),
+                            'video_type': str(self.combobox_type.currentText())}
+
+            })
+
+        time.sleep(sleep_time-datetime.datetime.timestamp(datetime.datetime.now()))
 
 
 def plot_emg(pipe):
@@ -154,5 +245,10 @@ def main():
     process_interface.join()
 
 
+s = socket.socket()
+
 if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    collector = IPCollector()
+    app.exec_()
     main()
