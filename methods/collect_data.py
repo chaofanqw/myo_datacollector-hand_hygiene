@@ -50,13 +50,13 @@ class DataCollector(myo.DeviceListener):
     Collects EMG data in a queue with *n* maximum number of elements.
     """
 
-    def __init__(self, n):
+    def __init__(self, n, device_start, device_end):
         self.n = n
+        self.device_start = device_start
+        self.device_end = device_end
+
         self.lock = Lock()
-        self.data_queue = {'emg': {'1': [], '2': [], '3': []},
-                           'orientation': {'1': [], '2': [], '3': []},
-                           'gyroscope': {'1': [], '2': [], '3': []},
-                           'acceleration': {'1': [], '2': [], '3': []}}
+        self.data_queue = generate_data_queue(self.device_start, self.device_end)
         self.devices = {}
         self.participant = {}
         self.time = datetime.datetime.timestamp(datetime.datetime.now()) * 1000000
@@ -74,12 +74,8 @@ class DataCollector(myo.DeviceListener):
         event.device.stream_emg(True)
 
         with self.lock:
-            if str(event.mac_address) == '9B:FA:53:BC:C7:ED':
-                self.devices[str(event.device_point)] = '1'
-            elif str(event.mac_address) == '27:DE:FB:9B:2F:FF':
-                self.devices[str(event.device_point)] = '2'
-            elif str(event.mac_address) == 'CD:77:5E:B2:99:D2':
-                self.devices[str(event.device_point)] = '3'
+            self.devices[str(event.device_point)] = \
+                str(devices.index(str(event.mac_address)) + 1)
 
     def on_emg(self, event):
         with self.lock:
@@ -105,10 +101,7 @@ class DataCollector(myo.DeviceListener):
     def set_participant(self, participant_info):
         with self.lock:
             self.participant = participant_info
-            self.data_queue = {'emg': {'1': [], '2': [], '3': []},
-                               'orientation': {'1': [], '2': [], '3': []},
-                               'gyroscope': {'1': [], '2': [], '3': []},
-                               'acceleration': {'1': [], '2': [], '3': []}}
+            self.data_queue = generate_data_queue(self.device_start, self.device_end)
             self.time = datetime.datetime.timestamp(datetime.datetime.now()) * 1000000
 
     def dump_doc(self):
@@ -164,12 +157,16 @@ class DataCollector(myo.DeviceListener):
 
 
 class Plot(object):
-
     def __init__(self, listener):
         self.n = listener.n
         self.listener = listener
         self.fig = plt.figure()
-        self.axes = [self.fig.add_subplot(8, 3, i) for i in range(1, 25)]
+
+        self.start = listener.device_start
+        self.end = listener.device_end
+        self.device_num = self.end - self.start + 1
+
+        self.axes = [self.fig.add_subplot(8, self.device_num, i) for i in range(1, self.device_num * 8 + 1)]
         [(ax.set_ylim([-100, 100]), ax.set_xticks([]),
           ax.set_yticks([])) for ax in self.axes]
 
@@ -177,15 +174,11 @@ class Plot(object):
         plt.ion()
 
     def update_plot(self):
-        emg_data_1 = self.listener.get_data('emg', '1')
-        emg_data_2 = self.listener.get_data('emg', '2')
-        emg_data_3 = self.listener.get_data('emg', '3')
+        emg_data = [self.listener.get_data('emg', str(device))
+                    for device in range(self.start, self.end + 1)]
 
-        self.set_plot(emg_data_1, self.graphs[0::3])
-        self.set_plot(emg_data_2, self.graphs[1::3])
-        self.set_plot(emg_data_3, self.graphs[2::3])
-
-        # plt.set_title()
+        [(self.set_plot(emg_data[device], self.graphs[device::self.device_num]))
+         for device in range(0, self.device_num)]
 
         plt.draw()
 
@@ -216,16 +209,29 @@ class Plot(object):
             plt.pause(1.0 / 50)
 
 
-def main(path):
+def generate_data_queue(num_start, num_end):
+    result = {}
+    for signal in signals:
+        result[signal] = {}
+        for device in range(num_start - 1, num_end):
+            result[signal][str(device + 1)] = []
+
+    return result
+
+
+def main(path, device_start, device_end):
     myo.init(sdk_path=path)
     hub = myo.Hub()
-    listener = DataCollector(512)
+    listener = DataCollector(512, device_start, device_end)
     with hub.run_in_background(listener.on_event):
         Plot(listener).main()
 
 
+signals = ['emg', 'orientation', 'gyroscope', 'acceleration']
+devices = ['9B:FA:53:BC:C7:ED', '27:DE:FB:9B:2F:FF', 'CD:77:5E:B2:99:D2', '36:B5:0C:6A:BB:D6']
+
 if __name__ == '__main__':
     if sys.platform.startswith('win'):
-        main('../myo_sdk/sdk_windows')
+        main('../myo_sdk/sdk_windows', 1, 2)
     elif sys.platform.startswith('darwin'):
-        main('./myo_sdk/sdk_macos')
+        main('./myo_sdk/sdk_macos', 3, 4)
