@@ -13,6 +13,7 @@ import socket
 import sched
 import time
 import datetime
+import json
 
 
 """
@@ -58,7 +59,7 @@ class IPCollector(QWidget):
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
-        self.move(qr.topRight())
+        self.move(qr.topLeft())
         self.setWindowTitle('Hand Washing Experiment')
 
         self.show()
@@ -84,16 +85,17 @@ class IPCollector(QWidget):
 
             self.close()
 
-    def closeEvent(self, QCloseEvent):
-        sys.exit()
+    # def closeEvent(self, QCloseEvent):
+    #     sys.exit()
 
 
 class HandWashingCollector(QWidget):
 
-    def __init__(self, pipe):
+    def __init__(self, pipe, s):
         super().__init__()
 
         self.pipe = pipe
+        self.s = s
         self.position_list = ['left-UpperArm left-LowerArm right-UpperArm right-LowerArm']
         self.video_type_list = ['With Demonstration', 'Without Demonstration', 'Poster']
         self.input_width = 300
@@ -118,7 +120,7 @@ class HandWashingCollector(QWidget):
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
-        self.move(qr.topLeft())
+        self.move(qr.topRight())
         self.setWindowTitle('Hand Washing Experiment')
 
         self.show()
@@ -165,7 +167,7 @@ class HandWashingCollector(QWidget):
         else:
             if 'Demonstration' in (str(self.combobox_type.currentText())):
                 player = vlc_player.Player()
-                player.set_pipe(self.pipe, s)
+                player.set_pipe(self.pipe, self.s)
 
                 self.connection()
 
@@ -184,7 +186,7 @@ class HandWashingCollector(QWidget):
 
             else:
                 handwashing_poster = poster.Poster()
-                handwashing_poster.set_pipe(self.pipe, s)
+                handwashing_poster.set_pipe(self.pipe, self.s)
 
                 self.connection()
 
@@ -197,20 +199,22 @@ class HandWashingCollector(QWidget):
     def connection(self):
         now = datetime.datetime.timestamp(datetime.datetime.now())
         time_offset = project_library.get_time_offset()
-        sleep_time = now + time_offset + 10
+        sleep_time = now + time_offset + 1
 
-        if self.s is not None:
-            self.s.send({
+        result = json.dumps({
                 'status': 'start',
                 'time': sleep_time,
                 'message': {'status': 'start', 'participant_name': str(self.line_edit.text()),
                             'experiment_times': str(self.experiment.text()),
                             'position': str(self.combobox_position.currentText()),
                             'video_type': str(self.combobox_type.currentText())}
+        })
 
-            })
+        if self.s is not None:
+            self.s.send(result.encode())
 
-        time.sleep(sleep_time-datetime.datetime.timestamp(datetime.datetime.now()))
+        sleep_diff = sleep_time - datetime.datetime.timestamp(datetime.datetime.now())
+        time.sleep(sleep_diff)
 
 
 def plot_emg(pipe):
@@ -228,9 +232,9 @@ def plot_emg(pipe):
         collect_data.Plot(listener).data_plot(pipe)
 
 
-def interface(pipe):
+def interface(pipe, s):
     app = QApplication(sys.argv)
-    collector = HandWashingCollector(pipe)
+    collector = HandWashingCollector(pipe, s)
     sys.exit(app.exec_())
 
 
@@ -238,7 +242,7 @@ def main():
     pipe_emg, pip_interface = Pipe()
 
     process_emg = Process(target=plot_emg, args=(pipe_emg,))
-    process_interface = Process(target=interface, args=(pip_interface,))
+    process_interface = Process(target=interface, args=(pip_interface, s))
     process_emg.start()
     process_interface.start()
     process_emg.join()
@@ -251,4 +255,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     collector = IPCollector()
     app.exec_()
+
     main()

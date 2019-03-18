@@ -25,8 +25,9 @@ def connection_mac(pipe):
 
     while True:
         response = c.recv(1024).decode()
-        if response is None:
+        if response is None or response == '':
             break
+        print(response)
         response = json.loads(response)
 
         if response['status'] == 'start':
@@ -34,7 +35,7 @@ def connection_mac(pipe):
             time_offset = project_library.get_time_offset()
             func = lambda pipe, response: pipe.send(response['message'])
 
-            now = datetime.datetime.now()
+            now = datetime.datetime.timestamp(datetime.datetime.now())
             sleep = response['time'] - (now + time_offset)
             scheduler.enter(sleep, 1, func, argument=(pipe, response))
 
