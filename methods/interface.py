@@ -8,6 +8,7 @@ import methods.poster as poster
 import methods.collect_data as collect_data
 import myo
 from multiprocessing import Process, Pipe
+import socket
 
 """
 In Windows, please install vlc(x64) from https://www.videolan.org/vlc/download-windows.html ,
@@ -124,12 +125,14 @@ class HandWashingCollector(QWidget):
 def plot_emg(pipe):
     if sys.platform.startswith('win'):
         path = '../myo_sdk/sdk_windows'
+        start_num, end_num = 1, 2
     elif sys.platform.startswith('darwin'):
         path = '../myo_sdk/sdk_macos'
+        start_num, end_num = 3, 4
 
     myo.init(sdk_path=path)
     hub = myo.Hub()
-    listener = collect_data.DataCollector(512)
+    listener = collect_data.DataCollector(512, start_num, end_num)
     with hub.run_in_background(listener.on_event):
         collect_data.Plot(listener).data_plot(pipe)
 

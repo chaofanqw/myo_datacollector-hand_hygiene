@@ -219,7 +219,14 @@ def generate_data_queue(num_start, num_end):
     return result
 
 
-def main(path, device_start, device_end):
+def main():
+    if sys.platform.startswith('win'):
+        path = '../myo_sdk/sdk_windows'
+        device_start, device_end = 1, 2
+    elif sys.platform.startswith('darwin'):
+        path = './myo_sdk/sdk_macos'
+        device_start, device_end = 3, 4
+
     myo.init(sdk_path=path)
     hub = myo.Hub()
     listener = DataCollector(512, device_start, device_end)
@@ -231,7 +238,4 @@ signals = ['emg', 'orientation', 'gyroscope', 'acceleration']
 devices = ['9B:FA:53:BC:C7:ED', '27:DE:FB:9B:2F:FF', 'CD:77:5E:B2:99:D2', '36:B5:0C:6A:BB:D6']
 
 if __name__ == '__main__':
-    if sys.platform.startswith('win'):
-        main('../myo_sdk/sdk_windows', 1, 2)
-    elif sys.platform.startswith('darwin'):
-        main('./myo_sdk/sdk_macos', 3, 4)
+    main()
