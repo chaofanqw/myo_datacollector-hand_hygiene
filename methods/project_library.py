@@ -7,7 +7,7 @@ import csv
 def get_time_offset():
     c = ntplib.NTPClient()
     response = c.request('au.pool.ntp.org', version=3)
-    return response.tx_timestamp, response.offset
+    return response.tx_time, response.offset
 
 
 if __name__ == '__main__':
