@@ -31,13 +31,15 @@ def connection_mac(pipe):
         response = json.loads(response)
 
         if response['status'] == 'start':
-            scheduler = sched.scheduler(time.time, time.sleep)
+            # scheduler = sched.scheduler(time.time, time.sleep)
             _, time_offset = project_library.get_time_offset()
-            func = lambda pipe, response: pipe.send(response['message'])
+            # func = lambda pipe, response: pipe.send(response['message'])
 
             now = datetime.datetime.timestamp(datetime.datetime.now())
             sleep = response['time'] - (now + time_offset)
-            scheduler.enter(sleep, 1, func, argument=(pipe, response))
+            # scheduler.enter(sleep, 1, func, argument=(pipe, response))
+            time.sleep(sleep)
+            pipe.send(response['message'])
 
         elif response['status'] == 'end':
             pipe.send({'status': 'end'})
