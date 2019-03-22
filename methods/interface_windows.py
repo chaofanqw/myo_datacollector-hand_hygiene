@@ -171,10 +171,6 @@ class HandWashingCollector(QWidget):
 
                 self.connection()
 
-                self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),
-                                'experiment_times': str(self.experiment.text()),
-                                'position': str(self.combobox_position.currentText()),
-                                'video_type': str(self.combobox_type.currentText())})
                 self.player.append(player)
                 player.show()
                 player.resize(1200, 800)
@@ -189,17 +185,13 @@ class HandWashingCollector(QWidget):
                 handwashing_poster.set_pipe(self.pipe, self.s)
 
                 self.connection()
-
-                self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),
-                                'experiment_times': str(self.experiment.text()),
-                                'position': str(self.combobox_position.currentText()),
-                                'video_type': str(self.combobox_type.currentText())})
                 self.player.append(handwashing_poster)
+                handwashing_poster.show()
 
     def connection(self):
         now = datetime.datetime.timestamp(datetime.datetime.now())
         _, time_offset = project_library.get_time_offset()
-        sleep_time = now + time_offset + 1
+        sleep_time = now + time_offset + 5
 
         result = json.dumps({
                 'status': 'start',
@@ -215,6 +207,11 @@ class HandWashingCollector(QWidget):
 
         sleep_diff = sleep_time - datetime.datetime.timestamp(datetime.datetime.now())
         time.sleep(sleep_diff)
+
+        self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),
+                        'experiment_times': str(self.experiment.text()),
+                        'position': str(self.combobox_position.currentText()),
+                        'video_type': str(self.combobox_type.currentText())})
 
 
 def plot_emg(pipe):

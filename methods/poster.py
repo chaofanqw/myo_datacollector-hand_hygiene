@@ -31,7 +31,7 @@ class Poster(QWidget):
         qr.moveCenter(cp)
         self.move(qr.topRight())
 
-        self.show()
+        # self.show()
 
     def set_pipe(self, pipe, s):
         self.pipe = pipe
