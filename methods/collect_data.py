@@ -61,7 +61,7 @@ class DataCollector(myo.DeviceListener):
         self.participant = {}
         self.time = datetime.datetime.timestamp(datetime.datetime.now()) * 1000000
 
-        self.installation = True
+        # self.installation = True
 
     def get_data(self, data_type, hand):
         with self.lock:
@@ -102,19 +102,21 @@ class DataCollector(myo.DeviceListener):
 
     def set_participant(self, participant_info):
         with self.lock:
-            if self.participant != {}:
-                if self.participant['participant_name'] != participant_info['participant_name']:
-                    self.installation = True
+            # if self.participant != {}:
+            #     if self.participant['participant_name'] != participant_info['participant_name']:
+            #         self.installation = True
+            #
+            # self.participant = participant_info
+            # temp = participant_info['experiment_times']
+            #
+            # if self.installation:
+            #     self.participant['experiment_times'] = '0'
+            #     self.dump_doc()
+            #     self.installation = False
+            #
+            # self.participant['experiment_times'] = temp
 
             self.participant = participant_info
-            temp = participant_info['experiment_times']
-
-            if self.installation:
-                self.participant['experiment_times'] = '0'
-                self.dump_doc()
-                self.installation = False
-
-            self.participant['experiment_times'] = temp
             self.data_queue = generate_data_queue(self.device_start, self.device_end)
             self.time = datetime.datetime.timestamp(datetime.datetime.now()) * 1000000
 
