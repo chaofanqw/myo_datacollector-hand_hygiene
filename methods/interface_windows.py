@@ -205,7 +205,7 @@ class HandWashingCollector(QWidget):
         if self.s is not None:
             self.s.send(result.encode())
 
-        sleep_diff = sleep_time - datetime.datetime.timestamp(datetime.datetime.now())
+        sleep_diff = sleep_time - (datetime.datetime.timestamp(datetime.datetime.now()) + time_offset)
         time.sleep(sleep_diff)
 
         self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),

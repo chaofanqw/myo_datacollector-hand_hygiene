@@ -8,7 +8,7 @@ import pandas
 
 def get_time_offset():
     c = ntplib.NTPClient()
-    response = c.request('europe.pool.ntp.org', version=3)
+    response = c.request('au.pool.ntp.org', version=3)
     return response.tx_time, response.offset
 
 
@@ -20,23 +20,21 @@ def plot_result():
 
 
 def generate_result():
-    times = 360
+    times = 6 * 60 * 18
     time_diff = []
-
-    for each in range(0, times):
-        try:
-            time_diff.append([*get_time_offset()])
-            print(each, time_diff[-1])
-            time.sleep(10)
-        except:
-            continue
-
     f = open('../data/data_diff.csv', 'w')
     time_writer = csv.writer(f)
     time_writer.writerow(['Time', 'TimeOffset'])
 
-    for each in range(0, len(time_diff)):
-        time_writer.writerow(time_diff[each])
+    for each in range(0, times):
+        try:
+            time_diff.append([*get_time_offset()])
+            time_writer.writerow(time_diff[-1])
+            f.flush()
+            print(each, time_diff[-1])
+            time.sleep(10)
+        except:
+            continue
 
     f.close()
 
