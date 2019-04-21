@@ -1,10 +1,11 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QDesktopWidget
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QPixmap
+from methods import video_record
 
 
 class Poster(QWidget):
-    def __init__(self):
+    def __init__(self, video_name):
         super().__init__()
         self.title = 'Handwashing Poster'
         self.left = 10
@@ -12,6 +13,7 @@ class Poster(QWidget):
         self.width = 640
         self.height = 480
         self.pipe = None
+        self.recorder = video_record.videoRecorder(video_name)
         self.initUI()
 
     def initUI(self):
@@ -28,8 +30,7 @@ class Poster(QWidget):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topRight())
-
-        self.show()
+        self.recorder.start()
 
     def set_pipe(self, pipe):
         self.pipe = pipe
@@ -37,6 +38,7 @@ class Poster(QWidget):
     def closeEvent(self, *args, **kwargs):
         if self.pipe is not None:
             self.pipe.send({'status': 'end'})
+            self.recorder.set_message()
 
         self.close()
 

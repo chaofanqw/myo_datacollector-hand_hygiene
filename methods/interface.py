@@ -8,6 +8,7 @@ import methods.poster as poster
 import methods.collect_data as collect_data
 import myo
 from multiprocessing import Process, Pipe
+import os
 
 """
 In Windows, please install vlc(x64) from https://www.videolan.org/vlc/download-windows.html ,
@@ -112,14 +113,31 @@ class HandWashingCollector(QWidget):
                 else:
                     player.OpenFile('../resource/Video_withoutDemon.mp4')
             else:
-                handwashing_poster = poster.Poster()
+                video = self.create_dir() + 'video.avi'
+                handwashing_poster = poster.Poster(video)
                 handwashing_poster.set_pipe(self.pipe)
                 self.pipe.send({'status': 'start', 'participant_name': str(self.line_edit.text()),
                                 'experiment_times': str(self.experiment.text()),
                                 'position': str(self.combobox_position.currentText()),
                                 'video_type': str(self.combobox_type.currentText())})
                 self.player.append(handwashing_poster)
+                handwashing_poster.show()
 
+    def create_dir(self):
+        data_path = '../data/'
+        data_path_participant = data_path + 'person-' + str(self.line_edit.text()) + '/'
+        data_path_participant_record = data_path_participant + 'Experiment-' + str(self.experiment.text()) + '/'
+
+        if not os.path.exists(data_path):
+            os.mkdir(data_path)
+
+        if not os.path.exists(data_path_participant):
+            os.mkdir(data_path_participant)
+
+        if not os.path.exists(data_path_participant_record):
+            os.mkdir(data_path_participant_record)
+
+        return data_path_participant_record
 
 def plot_emg(pipe):
     if sys.platform.startswith('win'):
