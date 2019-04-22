@@ -14,7 +14,7 @@ import sched
 import time
 import datetime
 import json
-
+import os
 
 """
 In Windows, please install vlc(x64) from https://www.videolan.org/vlc/download-windows.html ,
@@ -181,7 +181,8 @@ class HandWashingCollector(QWidget):
                     player.OpenFile('../resource/Video_withoutDemon.mp4')
 
             else:
-                handwashing_poster = poster.Poster()
+                video = self.create_dir() + 'video.avi'
+                handwashing_poster = poster.Poster(video)
                 handwashing_poster.set_pipe(self.pipe, self.s)
 
                 self.connection()
@@ -194,12 +195,12 @@ class HandWashingCollector(QWidget):
         sleep_time = now + time_offset + 5
 
         result = json.dumps({
-                'status': 'start',
-                'time': sleep_time,
-                'message': {'status': 'start', 'participant_name': str(self.line_edit.text()),
-                            'experiment_times': str(self.experiment.text()),
-                            'position': str(self.combobox_position.currentText()),
-                            'video_type': str(self.combobox_type.currentText())}
+            'status': 'start',
+            'time': sleep_time,
+            'message': {'status': 'start', 'participant_name': str(self.line_edit.text()),
+                        'experiment_times': str(self.experiment.text()),
+                        'position': str(self.combobox_position.currentText()),
+                        'video_type': str(self.combobox_type.currentText())}
         })
 
         if self.s is not None:
@@ -212,6 +213,22 @@ class HandWashingCollector(QWidget):
                         'experiment_times': str(self.experiment.text()),
                         'position': str(self.combobox_position.currentText()),
                         'video_type': str(self.combobox_type.currentText())})
+
+    def create_dir(self):
+        data_path = '../data/'
+        data_path_participant = data_path + 'person-' + str(self.line_edit.text()) + '/'
+        data_path_participant_record = data_path_participant + 'Experiment-' + str(self.experiment.text()) + '/'
+
+        if not os.path.exists(data_path):
+            os.mkdir(data_path)
+
+        if not os.path.exists(data_path_participant):
+            os.mkdir(data_path_participant)
+
+        if not os.path.exists(data_path_participant_record):
+            os.mkdir(data_path_participant_record)
+
+        return data_path_participant_record
 
 
 def plot_emg(pipe):
