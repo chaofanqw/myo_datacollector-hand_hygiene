@@ -220,6 +220,7 @@ class HandWashingCollector(QWidget):
         data_path = '../data/'
         data_path_participant = data_path + 'person-' + str(self.line_edit.text()) + '/'
         data_path_participant_record = data_path_participant + 'Experiment-' + str(self.experiment.text()) + '/'
+        data_path_participant_record_video = data_path_participant_record + 'video/'
 
         if not os.path.exists(data_path):
             os.mkdir(data_path)
@@ -230,7 +231,10 @@ class HandWashingCollector(QWidget):
         if not os.path.exists(data_path_participant_record):
             os.mkdir(data_path_participant_record)
 
-        return data_path_participant_record
+        if not os.path.exists(data_path_participant_record_video):
+            os.mkdir(data_path_participant_record_video)
+
+        return data_path_participant_record_video
 
 
 def plot_emg(pipe):
