@@ -9,7 +9,7 @@ import pandas
 def get_time_offset():
     c = ntplib.NTPClient()
     response = c.request('au.pool.ntp.org', version=3)
-    return response.tx_time, response.offset
+    return response.orig_time, response.offset
 
 
 def plot_result():
