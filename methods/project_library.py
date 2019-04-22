@@ -14,8 +14,8 @@ def get_time_offset():
 
 def plot_result():
     result = pandas.read_csv('../data/data_diff.csv')
-    time_offset = list(result['TimeOffset'])
-    plt.plot([x for x in range(0, len(time_offset))], time_offset)
+    # time_offset = list(result['TimeOffset'])
+    plt.plot(result['Time'], result['TimeOffset'])
     plt.show()
 
 

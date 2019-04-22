@@ -32,9 +32,11 @@ class Poster(QWidget):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topRight())
-        self.recorder.start()
 
         # self.show()
+
+    def start_record(self):
+        self.recorder.start()
 
     def set_pipe(self, pipe, s):
         self.pipe = pipe

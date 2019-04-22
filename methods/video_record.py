@@ -16,6 +16,7 @@ class videoRecorder(Thread):
         while True:
             ret, frame = cap.read()
             if ret:
+                cv2.flip(frame, 1, frame)
                 out.write(frame)
                 cv2.imshow("frame", frame)
                 if cv2.waitKey(1) & self.message:

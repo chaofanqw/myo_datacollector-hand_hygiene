@@ -15,6 +15,7 @@ import time
 import datetime
 import json
 import os
+import pause
 
 """
 In Windows, please install vlc(x64) from https://www.videolan.org/vlc/download-windows.html ,
@@ -186,6 +187,7 @@ class HandWashingCollector(QWidget):
                 handwashing_poster.set_pipe(self.pipe, self.s)
 
                 self.connection()
+                handwashing_poster.start_record()
                 self.player.append(handwashing_poster)
                 handwashing_poster.show()
 
