@@ -1,4 +1,4 @@
-import methods.interface_windows as interface
+import methods.interface_sub as interface
 import methods.project_library as project_library
 import socket
 from threading import Thread
@@ -49,7 +49,7 @@ def main():
     thread = Thread(target=connection_mac, args=(pipe2,))
     thread.start()
 
-    interface.plot_emg(pipe1)
+    interface.plot_emg(pipe1, True)
 
 
 if __name__ == '__main__':
