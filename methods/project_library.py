@@ -9,7 +9,8 @@ import pandas
 def get_time_offset():
     c = ntplib.NTPClient()
     response = c.request('au.pool.ntp.org', version=3)
-    return response.orig_time, response.offset
+    return response.orig_time, response.offset, response.delay, response.tx_time, response.recv_time, \
+           response.orig_time, response.ref_time, response.dest_time
 
 
 def plot_result():
@@ -20,11 +21,11 @@ def plot_result():
 
 
 def generate_result():
-    times = 6 * 60 * 18
+    times = 6 * 60 * 72
     time_diff = []
     f = open('../data/data_diff.csv', 'w')
     time_writer = csv.writer(f)
-    time_writer.writerow(['Time', 'TimeOffset'])
+    time_writer.writerow(['Time', 'TimeOffset', 'delay', 'tx_time', 'recv_time', 'orig_time', 'ref_time', 'dest_time'])
 
     for each in range(0, times):
         try:
@@ -44,4 +45,3 @@ if __name__ == '__main__':
         generate_result()
     else:
         plot_result()
-
