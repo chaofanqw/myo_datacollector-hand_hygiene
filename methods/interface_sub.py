@@ -193,7 +193,7 @@ class HandWashingCollector(QWidget):
 
     def connection(self):
         now = datetime.datetime.timestamp(datetime.datetime.now())
-        _, time_offset = project_library.get_time_offset()
+        time_offset = project_library.get_time_offset()[1]
         sleep_time = now + time_offset + 5
 
         result = json.dumps({

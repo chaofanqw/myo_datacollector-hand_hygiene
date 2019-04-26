@@ -31,7 +31,7 @@ def connection_mac(pipe):
         response = json.loads(response)
 
         if response['status'] == 'start':
-            _, time_offset = project_library.get_time_offset()
+            _, time_offset = project_library.get_time_offset()[1]
 
             now = datetime.datetime.timestamp(datetime.datetime.now())
             sleep = response['time'] - (now + time_offset)
