@@ -14,7 +14,7 @@ def get_time_offset():
 
 
 def plot_result():
-    result = pandas.read_csv('../data/data_diff.csv')
+    result = pandas.read_csv('../data/time_diff/data_diff.csv')
     # time_offset = list(result['TimeOffset'])
     plt.plot(result['Time'], result['TimeOffset'])
     plt.show()
@@ -23,7 +23,7 @@ def plot_result():
 def generate_result():
     times = 6 * 60 * 72
     time_diff = []
-    f = open('../data/data_diff.csv', 'w')
+    f = open('../data/time_diff/data_diff.csv', 'w')
     time_writer = csv.writer(f)
     time_writer.writerow(['Time', 'TimeOffset', 'delay', 'tx_time', 'recv_time', 'orig_time', 'ref_time', 'dest_time'])
 
@@ -41,7 +41,7 @@ def generate_result():
 
 
 if __name__ == '__main__':
-    if not os.path.exists('../data/data_diff.csv'):
+    if not os.path.exists('../data/time_diff/data_diff.csv'):
         generate_result()
     else:
         plot_result()

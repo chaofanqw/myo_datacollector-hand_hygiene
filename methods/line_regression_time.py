@@ -7,7 +7,7 @@ import datetime
 
 estimators = TheilSenRegressor()
 
-result = pd.read_csv('../data/data_diff.csv')
+result = pd.read_csv('../data/time_diff/data_diff.csv')
 timestamp = numpy.array(result['Time']).reshape(-1, 1)
 time_offset = result['TimeOffset']
 time_result = [datetime.datetime.fromtimestamp(each).strftime('%H:%M') for each in list(result['Time'])]
