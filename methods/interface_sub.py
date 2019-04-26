@@ -240,10 +240,10 @@ class HandWashingCollector(QWidget):
 def plot_emg(pipe, host=False):
     if sys.platform.startswith('win'):
         path = '../myo_sdk/sdk_windows'
-        start_num, end_num = (1, 2) if not host else (3, 4)
+        start_num, end_num = (1, 3) if not host else (4, 4)
     elif sys.platform.startswith('darwin'):
         path = '../myo_sdk/sdk_macos'
-        start_num, end_num = 3, 4
+        start_num, end_num = 4, 4
 
     myo.init(sdk_path=path)
     hub = myo.Hub()
