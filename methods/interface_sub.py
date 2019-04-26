@@ -98,7 +98,8 @@ class HandWashingCollector(QWidget):
         self.pipe = pipe
         self.s = s
         self.position_list = ['left-UpperArm left-LowerArm right-UpperArm right-LowerArm']
-        self.video_type_list = ['With Demonstration', 'Without Demonstration', 'Poster']
+        self.video_type_list = ['With Demonstration', 'Without Demonstration', 'Poster', 'Handrub With Demonstration',
+                                'Handrub Poster']
         self.input_width = 300
 
         self.v_layout = QVBoxLayout()
@@ -178,12 +179,19 @@ class HandWashingCollector(QWidget):
 
                 if (str(self.combobox_type.currentText())) == 'With Demonstration':
                     player.OpenFile('../resource/Video_withDemon.mp4')
-                else:
+                elif (str(self.combobox_type.currentText())) == 'Without Demonstration':
                     player.OpenFile('../resource/Video_withoutDemon.mp4')
+                else:
+                    player.OpenFile('../resource/handrub_withDemon.mp4')
 
             else:
                 video = self.create_dir() + 'video.avi'
-                handwashing_poster = poster.Poster(video)
+
+                if (str(self.combobox_type.currentText())) == 'Handrub Poster':
+                    handwashing_poster = poster.Poster(video, 'handrub')
+                else:
+                    handwashing_poster = poster.Poster(video, 'handwashing')
+
                 handwashing_poster.set_pipe(self.pipe, self.s)
 
                 self.connection()

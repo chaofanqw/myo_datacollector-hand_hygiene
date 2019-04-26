@@ -6,7 +6,7 @@ from methods import video_record
 
 
 class Poster(QWidget):
-    def __init__(self, video_name):
+    def __init__(self, video_name, type_name):
         super().__init__()
         self.title = 'Handwashing Poster'
         self.left = 10
@@ -16,6 +16,7 @@ class Poster(QWidget):
         self.pipe = None
         self.s = None
         self.recorder = video_record.videoRecorder(video_name)
+        self.type_name = type_name
         self.initUI()
 
     def initUI(self):
@@ -24,7 +25,11 @@ class Poster(QWidget):
 
         # Create widget
         label = QLabel(self)
-        pixmap = QPixmap('../resource/handwashing.png')
+        if self.type_name == 'handwashing':
+            pixmap = QPixmap('../resource/handwashing.png')
+        else:
+            pixmap = QPixmap('../resource/handrub.png')
+
         label.setPixmap(pixmap)
         self.resize(pixmap.width(), pixmap.height())
 
