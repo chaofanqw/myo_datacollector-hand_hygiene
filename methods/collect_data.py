@@ -124,6 +124,7 @@ class DataCollector(myo.DeviceListener):
         data_path = '../data/'
         data_path_participant = data_path + 'person-' + self.participant['participant_name'] + '/'
         data_path_participant_record = data_path_participant + 'Experiment-' + self.participant['experiment_times'] + '/'
+        data_path_participant_record_info = data_path_participant_record + 'info'
 
         demo = True if self.participant['video_type'] == 'With Demonstration' else False
         display_type = 'Poster' if 'Poster' in self.participant['video_type'] else 'Video'
@@ -137,6 +138,13 @@ class DataCollector(myo.DeviceListener):
             os.mkdir(data_path_participant)
         if not os.path.exists(data_path_participant_record):
             os.mkdir(data_path_participant_record)
+        if not os.path.exists(data_path_participant_record_info):
+            os.mkdir(data_path_participant_record_info)
+
+        csv_time = open(data_path_participant_record_info + 'start_time.csv', 'w')
+        time_writer = csv.writer(csv_time)
+        time_writer.writerow(['start_time'])
+        time_writer.writerow([self.time])
 
         for signal in self.data_queue:
             if signal == 'emg':
