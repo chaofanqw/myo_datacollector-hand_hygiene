@@ -121,63 +121,64 @@ class DataCollector(myo.DeviceListener):
             self.time = datetime.datetime.timestamp(datetime.datetime.now()) * 1000000
 
     def dump_doc(self):
-        data_path = '../data/'
-        data_path_participant = data_path + 'person-' + self.participant['participant_name'] + '/'
-        data_path_participant_record = data_path_participant + 'Experiment-' + self.participant['experiment_times'] + '/'
-        data_path_participant_record_info = data_path_participant_record + 'info'
+        with self.lock:
+            data_path = '../data/'
+            data_path_participant = data_path + 'person-' + self.participant['participant_name'] + '/'
+            data_path_participant_record = data_path_participant + 'Experiment-' + self.participant['experiment_times'] + '/'
+            data_path_participant_record_info = data_path_participant_record + 'info'
 
-        demo = True if self.participant['video_type'] == 'With Demonstration' else False
-        display_type = 'Poster' if 'Poster' in self.participant['video_type'] else 'Video'
+            demo = True if self.participant['video_type'] == 'With Demonstration' else False
+            display_type = 'Poster' if 'Poster' in self.participant['video_type'] else 'Video'
 
-        base_attributes = ['-MyoNum', 'Hand', 'TimeInMilliSec', 'ParticipantNum',
-                           'WearingPos', 'RecordType', 'DisplayType', 'withDemon', 'numFrame', 'DataType']
+            base_attributes = ['-MyoNum', 'Hand', 'TimeInMilliSec', 'ParticipantNum',
+                               'WearingPos', 'RecordType', 'DisplayType', 'withDemon', 'numFrame', 'DataType']
 
-        if not os.path.exists(data_path):
-            os.mkdir(data_path)
-        if not os.path.exists(data_path_participant):
-            os.mkdir(data_path_participant)
-        if not os.path.exists(data_path_participant_record):
-            os.mkdir(data_path_participant_record)
-        if not os.path.exists(data_path_participant_record_info):
-            os.mkdir(data_path_participant_record_info)
+            if not os.path.exists(data_path):
+                os.mkdir(data_path)
+            if not os.path.exists(data_path_participant):
+                os.mkdir(data_path_participant)
+            if not os.path.exists(data_path_participant_record):
+                os.mkdir(data_path_participant_record)
+            if not os.path.exists(data_path_participant_record_info):
+                os.mkdir(data_path_participant_record_info)
 
-        csv_time = open(data_path_participant_record_info + 'start_time.csv', 'w')
-        time_writer = csv.writer(csv_time)
-        time_writer.writerow(['start_time'])
-        time_writer.writerow([self.time])
+            csv_time = open(data_path_participant_record_info + 'start_time.csv', 'w')
+            time_writer = csv.writer(csv_time)
+            time_writer.writerow(['start_time'])
+            time_writer.writerow([self.time])
 
-        for signal in self.data_queue:
-            if signal == 'emg':
-                attributes = base_attributes + ['d' + str(i) for i in range(1, 9)]
-            elif signal == 'orientation':
-                attributes = base_attributes + ['roll', 'pitch', 'yaw', 'magnitude']
-            else:
-                attributes = base_attributes + ['x', 'y', 'z']
+            for signal in self.data_queue:
+                if signal == 'emg':
+                    attributes = base_attributes + ['d' + str(i) for i in range(1, 9)]
+                elif signal == 'orientation':
+                    attributes = base_attributes + ['roll', 'pitch', 'yaw', 'magnitude']
+                else:
+                    attributes = base_attributes + ['x', 'y', 'z']
 
-            for hand in self.data_queue[signal]:
-                arm_position = self.participant['position'].split(' ')[int(hand) - 1]
-                arm = arm_position.split('-')[0]
-                position = arm_position.split('-')[1]
+                for hand in self.data_queue[signal]:
+                    arm_position = self.participant['position'].split(' ')[int(hand) - 1]
+                    arm = arm_position.split('-')[0]
+                    position = arm_position.split('-')[1]
 
-                csv_doc = open(data_path_participant_record + signal + '_' + arm + '_' + position + '.csv', 'w')
-                csv_writer = csv.writer(csv_doc)
-                csv_writer.writerow(attributes)
+                    csv_doc = open(data_path_participant_record + signal + '_' + arm + '_' + position + '.csv', 'w')
+                    csv_writer = csv.writer(csv_doc)
+                    csv_writer.writerow(attributes)
 
-                for row in self.data_queue[signal][hand]:
-                    record_base = ['Myo-' + hand, arm, row[3],
-                                   self.participant['participant_name'], position,
-                                   'Record', display_type, demo, row[2]]
+                    for row in self.data_queue[signal][hand]:
+                        record_base = ['Myo-' + hand, arm, row[3],
+                                       self.participant['participant_name'], position,
+                                       'Record', display_type, demo, row[2]]
 
-                    if signal == 'emg':
-                        csv_writer.writerow(record_base + ['EmgData'] + row[1])
-                    elif signal == 'orientation':
-                        csv_writer.writerow(record_base + ['OriData'] + list(row[1]))
-                    elif signal == 'gyroscope':
-                        csv_writer.writerow(record_base + ['GyroData'] + list(row[1]))
-                    elif signal == 'acceleration':
-                        csv_writer.writerow(record_base + ['AcceleData'] + list(row[1]))
+                        if signal == 'emg':
+                            csv_writer.writerow(record_base + ['EmgData'] + row[1])
+                        elif signal == 'orientation':
+                            csv_writer.writerow(record_base + ['OriData'] + list(row[1]))
+                        elif signal == 'gyroscope':
+                            csv_writer.writerow(record_base + ['GyroData'] + list(row[1]))
+                        elif signal == 'acceleration':
+                            csv_writer.writerow(record_base + ['AcceleData'] + list(row[1]))
 
-                csv_doc.close()
+                    csv_doc.close()
 
 
 class Plot(object):
