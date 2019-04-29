@@ -24,8 +24,9 @@ class videoRecorder(Thread):
             ret, frame = cap.read()
             if ret:
                 cv2.flip(frame, 1, frame)
+                cv2.putText(frame, str(num), (50, 50), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, (255, 255, 255))
 
-                csv_writer.writerow([num, time.time()])
+                csv_writer.writerow([num, time.time() * 1000000])
                 num += 1
                 out.write(frame)
 
