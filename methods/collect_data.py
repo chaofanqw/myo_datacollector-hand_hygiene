@@ -125,7 +125,7 @@ class DataCollector(myo.DeviceListener):
             data_path = '../data/'
             data_path_participant = data_path + 'person-' + self.participant['participant_name'] + '/'
             data_path_participant_record = data_path_participant + 'Experiment-' + self.participant['experiment_times'] + '/'
-            data_path_participant_record_info = data_path_participant_record + 'info'
+            data_path_participant_record_info = data_path_participant_record + 'info/'
 
             demo = True if self.participant['video_type'] == 'With Demonstration' else False
             display_type = 'Poster' if 'Poster' in self.participant['video_type'] else 'Video'
