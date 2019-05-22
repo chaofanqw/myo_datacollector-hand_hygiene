@@ -98,8 +98,8 @@ class HandWashingCollector(QWidget):
         self.pipe = pipe
         self.s = s
         self.position_list = ['left-UpperArm left-LowerArm right-UpperArm right-LowerArm']
-        self.video_type_list = ['With Demonstration', 'Without Demonstration', 'Poster', 'Handrub With Demonstration',
-                                'Handrub Poster']
+        self.video_type_list = ['Handwash With Demonstration', 'Handwash Without Demonstration', 'Poster',
+                                'Handrub With Demonstration', 'Handrub Without Demonstration', 'Handrub Poster']
         self.input_width = 300
 
         self.v_layout = QVBoxLayout()
@@ -167,26 +167,28 @@ class HandWashingCollector(QWidget):
             warning_box.setStandardButtons(QMessageBox.Ok)
             warning_box.exec()
         else:
+            video = self.create_dir() + 'video.avi'
             if 'Demonstration' in (str(self.combobox_type.currentText())):
-                player = vlc_player.Player()
+                player = vlc_player.Player(video)
                 player.set_pipe(self.pipe, self.s)
 
                 self.connection()
+                player.start_record()
 
                 self.player.append(player)
                 player.show()
                 player.resize(1200, 800)
 
-                if (str(self.combobox_type.currentText())) == 'With Demonstration':
-                    player.OpenFile('../resource/Video_withDemon.mp4')
-                elif (str(self.combobox_type.currentText())) == 'Without Demonstration':
-                    player.OpenFile('../resource/Video_withoutDemon.mp4')
-                else:
-                    player.OpenFile('../resource/handrub_withDemon.mp4')
+                if (str(self.combobox_type.currentText())) == 'Handwash With Demonstration':
+                    player.OpenFile('../resource/handwash_with_demo.mp4')
+                elif (str(self.combobox_type.currentText())) == 'Handwash Without Demonstration':
+                    player.OpenFile('../resource/handwash_without_demo.mp4')
+                elif (str(self.combobox_type.currentText())) == 'Handrub With Demonstration':
+                    player.OpenFile('../resource/handrub_with_demon.mp4')
+                elif (str(self.combobox_type.currentText())) == 'Handrub Without Demonstration':
+                    player.OpenFile('../resource/handrub_without_demo.mp4')
 
             else:
-                video = self.create_dir() + 'video.avi'
-
                 if (str(self.combobox_type.currentText())) == 'Handrub Poster':
                     handwashing_poster = poster.Poster(video, 'handrub')
                 else:

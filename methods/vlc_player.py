@@ -27,13 +27,14 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QFrame, QSlider, QHBoxLayout, 
     QVBoxLayout, QAction, QFileDialog, QApplication
 import vlc
 import json
+from methods import video_record
 
 
 class Player(QMainWindow):
     """A simple Media Player using VLC and Qt
     """
 
-    def __init__(self, master=None):
+    def __init__(self, video_name, master=None):
         QMainWindow.__init__(self, master)
         self.setWindowTitle("Media Player")
 
@@ -46,6 +47,7 @@ class Player(QMainWindow):
         self.isPaused = False
         self.pipe = None
         self.s = None
+        self.recorder = video_record.videoRecorder(video_name)
 
     def createUI(self):
         """Set up the user interface, signals & slots
@@ -183,6 +185,9 @@ class Player(QMainWindow):
         # factor, the more precise are the results
         # (1000 should be enough)
 
+    def start_record(self):
+        self.recorder.start()
+
     def updateUI(self):
         """updates the user interface"""
         # setting the slider to the desired position
@@ -201,6 +206,7 @@ class Player(QMainWindow):
                 if not self.s is None:
                     self.s.send(json.dumps({'status': 'end'}).encode())
 
+                self.recorder.set_message()
                 self.close()
 
     def set_pipe(self, pipe, s):
