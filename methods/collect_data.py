@@ -148,7 +148,7 @@ class DataCollector(myo.DeviceListener):
             time_writer.writerow([self.time])
             csv_time.close()
 
-            csv_type = open(data_path_participant_record_info + 'start_time.csv', 'w')
+            csv_type = open(data_path_participant_record_info + 'hygiene_type.csv', 'w')
             type_writer = csv.writer(csv_type)
             type_writer.writerow(['type'])
             type_writer.writerow([self.participant['video_type']])
