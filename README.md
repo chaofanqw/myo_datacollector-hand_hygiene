@@ -51,17 +51,26 @@
         import matplotlib
         matplotlib.use('Agg')
 
-#### To Run project / Collect data
+#### To Run project / Collect data (4 armbands)
 *For Now, this project could be only functioned on Windows platform (Windows 10), 
 because the matplotlib and PyQt5 libraries could not worked with multi-processes in MacOS platform.*
 
-> To start with terminal: 
+> Please add your armband MAC address inside collect_data.py
 
-    python/python3 interface.py
+> To start with terminal (Mac): 
+
+    python/python3 interface-host.py
+
+> To start with terminal (Windows): 
+
+    python/python3 interface-sub.py
  
 > Using Pycharm:
 
-    Run interface.py
+    Run interface-host.py or interface-sub.py
+
+#### To Run project / Collect data (3 armbands
+Please switch to another branch
 
 The collected data will locate on:
 > *myo/data*

@@ -267,7 +267,8 @@ def main():
 
 
 signals = ['emg', 'orientation', 'gyroscope', 'acceleration']
-devices = ['9B:FA:53:BC:C7:ED', '27:DE:FB:9B:2F:FF', 'CD:77:5E:B2:99:D2', '36:B5:0C:6A:BB:D6']
+# Please add your own devices' bluetooth MAC address
+devices = []
 
 if __name__ == '__main__':
     main()

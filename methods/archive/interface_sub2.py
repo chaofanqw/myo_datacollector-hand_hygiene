@@ -226,7 +226,7 @@ class HandWashingCollector(QWidget):
     #                     'video_type': str(self.combobox_type.currentText())})
 
     def create_dir(self):
-        data_path = '../data/'
+        data_path = '../../data/'
         data_path_participant = data_path + 'person-' + str(self.line_edit.text()) + '/'
         data_path_participant_record = data_path_participant + 'Experiment-' + str(self.experiment.text()) + '/'
         data_path_participant_record_video = data_path_participant_record + 'video/'
@@ -248,9 +248,9 @@ class HandWashingCollector(QWidget):
 
 def plot_emg(pipe, host=False):
     if sys.platform.startswith('win'):
-        path = '../myo_sdk/sdk_windows'
+        path = '../../myo_sdk/sdk_windows'
     elif sys.platform.startswith('darwin'):
-        path = '../myo_sdk/sdk_macos'
+        path = '../../myo_sdk/sdk_macos'
 
     start_num, end_num = (1, 3)
     myo.init(sdk_path=path)
